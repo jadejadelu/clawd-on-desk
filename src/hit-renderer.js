@@ -141,43 +141,29 @@ function handleClick(clientX) {
   clickCount++;
   if (clickCount === 1) {
     firstClickDir = clientX < area.offsetWidth / 2 ? "left" : "right";
-    // 单击时：idle 状态聚焦终端，非 idle 状态也聚焦终端
-    window.hitAPI.focusTerminal();
   }
 
   if (clickTimer) { clearTimeout(clickTimer); clickTimer = null; }
 
-  if (clickCount >= 4) {
+  clickTimer = setTimeout(() => {
+    clickTimer = null;
+    const count = clickCount;
     clickCount = 0;
     firstClickDir = null;
-    // 4 连击：idle 状态播放反应动画，非 idle 状态也播放（用户明确想互动）
-    if (currentSvg === "clawd-idle-follow.svg" || currentSvg === "clawd-idle-living.svg") {
-      const doubleSvg = REACT_DOUBLE_SVGS[Math.floor(Math.random() * REACT_DOUBLE_SVGS.length)];
-      playReaction(doubleSvg, REACT_DOUBLE_DURATION);
-    }
-  } else if (clickCount >= 2) {
-    clickTimer = setTimeout(() => {
-      clickTimer = null;
-      const count = clickCount;
-      clickCount = 0;
-      firstClickDir = null;
-      if (count >= 4) {
-        if (currentSvg === "clawd-idle-follow.svg" || currentSvg === "clawd-idle-living.svg") {
-          const doubleSvg = REACT_DOUBLE_SVGS[Math.floor(Math.random() * REACT_DOUBLE_SVGS.length)];
-          playReaction(doubleSvg, REACT_DOUBLE_DURATION);
-        }
-      } else {
-        // 双击：无论什么状态都打开 Ask Claude 面板
-        window.hitAPI.openAskPanel();
+    if (count >= 4) {
+      // 4 连击：播放反应动画
+      if (currentSvg === "clawd-idle-follow.svg" || currentSvg === "clawd-idle-living.svg") {
+        const doubleSvg = REACT_DOUBLE_SVGS[Math.floor(Math.random() * REACT_DOUBLE_SVGS.length)];
+        playReaction(doubleSvg, REACT_DOUBLE_DURATION);
       }
-    }, CLICK_WINDOW_MS);
-  } else {
-    clickTimer = setTimeout(() => {
-      clickTimer = null;
-      clickCount = 0;
-      firstClickDir = null;
-    }, CLICK_WINDOW_MS);
-  }
+    } else if (count >= 2) {
+      // 双击：打开 Ask Claude 面板
+      window.hitAPI.openAskPanel();
+    } else {
+      // 单击：聚焦终端
+      window.hitAPI.focusTerminal();
+    }
+  }, CLICK_WINDOW_MS);
 }
 
 function playReaction(svg, duration) {
