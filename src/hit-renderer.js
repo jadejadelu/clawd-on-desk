@@ -138,15 +138,10 @@ function handleClick(clientX) {
   }
   if (isReacting || isDragReacting) return;
 
-  // Non-idle: focus terminal, no reaction
-  if (currentSvg !== "clawd-idle-follow.svg" && currentSvg !== "clawd-idle-living.svg") {
-    window.hitAPI.focusTerminal();
-    return;
-  }
-
   clickCount++;
   if (clickCount === 1) {
     firstClickDir = clientX < area.offsetWidth / 2 ? "left" : "right";
+    // 单击时：idle 状态聚焦终端，非 idle 状态也聚焦终端
     window.hitAPI.focusTerminal();
   }
 
@@ -155,8 +150,11 @@ function handleClick(clientX) {
   if (clickCount >= 4) {
     clickCount = 0;
     firstClickDir = null;
-    const doubleSvg = REACT_DOUBLE_SVGS[Math.floor(Math.random() * REACT_DOUBLE_SVGS.length)];
-    playReaction(doubleSvg, REACT_DOUBLE_DURATION);
+    // 4 连击：idle 状态播放反应动画，非 idle 状态也播放（用户明确想互动）
+    if (currentSvg === "clawd-idle-follow.svg" || currentSvg === "clawd-idle-living.svg") {
+      const doubleSvg = REACT_DOUBLE_SVGS[Math.floor(Math.random() * REACT_DOUBLE_SVGS.length)];
+      playReaction(doubleSvg, REACT_DOUBLE_DURATION);
+    }
   } else if (clickCount >= 2) {
     clickTimer = setTimeout(() => {
       clickTimer = null;
@@ -164,9 +162,12 @@ function handleClick(clientX) {
       clickCount = 0;
       firstClickDir = null;
       if (count >= 4) {
-        const doubleSvg = REACT_DOUBLE_SVGS[Math.floor(Math.random() * REACT_DOUBLE_SVGS.length)];
-        playReaction(doubleSvg, REACT_DOUBLE_DURATION);
+        if (currentSvg === "clawd-idle-follow.svg" || currentSvg === "clawd-idle-living.svg") {
+          const doubleSvg = REACT_DOUBLE_SVGS[Math.floor(Math.random() * REACT_DOUBLE_SVGS.length)];
+          playReaction(doubleSvg, REACT_DOUBLE_DURATION);
+        }
       } else {
+        // 双击：无论什么状态都打开 Ask Claude 面板
         window.hitAPI.openAskPanel();
       }
     }, CLICK_WINDOW_MS);

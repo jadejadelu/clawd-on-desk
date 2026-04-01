@@ -116,9 +116,9 @@ html, body {
   color: #fff;
 }
 .btn-close {
-  width: 24px;
-  height: 24px;
-  border-radius: 6px;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
   background: transparent;
   border: none;
   cursor: pointer;
@@ -129,8 +129,10 @@ html, body {
   transition: background 0.15s, color 0.15s;
   flex-shrink: 0;
   -webkit-app-region: no-drag;
+  padding: 8px;
 }
 .btn-close:hover { background: var(--close-hover); color: var(--text); }
+.btn-close:active { transform: scale(0.95); }
 
 /* Workspace selector */
 .workspace-selector {
@@ -504,7 +506,8 @@ btnSend.addEventListener("click", () => {
 });
 
 inputEl.addEventListener("keydown", (e) => {
-  if (e.key === "Enter" && !e.shiftKey) {
+  // 修复中文输入法问题：检查 isComposing 状态
+  if (e.key === "Enter" && !e.shiftKey && !e.isComposing) {
     e.preventDefault();
     sendPrompt();
   }
